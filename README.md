@@ -84,6 +84,7 @@ Server berjalan di `http://localhost:<PORT>` (default `3000`).
 | GET | `/api/users` | - | List semua user |
 | GET | `/api/users/:id` | - | Detail user berdasarkan id |
 | POST | `/api/users` | `{ "name": string, "email": string, "password": string }` | Registrasi user baru |
+| POST | `/api/users/login` | `{ "email": string, "password": string }` | Login user, mengembalikan session token |
 | PUT | `/api/users/:id` | `{ "name"?: string, "email"?: string }` | Update user |
 | DELETE | `/api/users/:id` | - | Hapus user |
 
@@ -112,6 +113,34 @@ Semua response error mengikuti format konsisten, dengan `error` berupa string:
 ```json
 {
   "error": "Email sudah terdaftar"
+}
+```
+
+#### Login User
+
+Request:
+
+```bash
+curl -i -X POST http://localhost:3000/api/users/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"aditya@localhost","password":"rahasia"}'
+```
+
+Response sukses — status `200`:
+
+```json
+{
+  "data": "b3b3c6a0-... (UUID token)"
+}
+```
+
+Token disimpan di tabel `sessions` bersama `user_id` pemiliknya.
+
+Response error — status `401`, untuk email tidak terdaftar maupun password salah:
+
+```json
+{
+  "error": "Email atau password salah"
 }
 ```
 

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../config/db";
-import { users, type NewUser } from "../db/schema";
+import { sessions, users, type NewUser } from "../db/schema";
 
 export abstract class HttpError extends Error {
   abstract status: number;
@@ -12,6 +12,10 @@ export class NotFoundError extends HttpError {
 
 export class ConflictError extends HttpError {
   status = 409;
+}
+
+export class UnauthorizedError extends HttpError {
+  status = 401;
 }
 
 const publicColumns = {
@@ -63,5 +67,26 @@ export const usersService = {
     await db.insert(users).values({ ...data, password: hashed });
 
     return { data: "OK" };
+  },
+
+  async login(data: Pick<NewUser, "email" | "password">) {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, data.email));
+
+    if (!user) {
+      throw new UnauthorizedError("Email atau password salah");
+    }
+
+    const isValid = await Bun.password.verify(data.password, user.password);
+    if (!isValid) {
+      throw new UnauthorizedError("Email atau password salah");
+    }
+
+    const token = crypto.randomUUID();
+    await db.insert(sessions).values({ token, userId: user.id });
+
+    return { data: token };
   },
 };

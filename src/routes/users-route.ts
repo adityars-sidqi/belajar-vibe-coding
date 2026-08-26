@@ -7,6 +7,11 @@ const registerBody = t.Object({
   password: t.String({ minLength: 6 }),
 });
 
+const loginBody = t.Object({
+  email: t.String({ format: "email" }),
+  password: t.String({ minLength: 1 }),
+});
+
 const userUpdateBody = t.Object({
   name: t.Optional(t.String({ minLength: 1 })),
   email: t.Optional(t.String({ format: "email" })),
@@ -18,6 +23,9 @@ const idParams = t.Object({
 
 export const usersRoutes = new Elysia({ prefix: "/api/users" })
   .get("/", () => usersService.list())
+  .post("/login", ({ body }) => usersService.login(body), {
+    body: loginBody,
+  })
   .get("/:id", ({ params }) => usersService.getById(params.id), {
     params: idParams,
   })
