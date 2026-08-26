@@ -86,6 +86,7 @@ Server berjalan di `http://localhost:<PORT>` (default `3000`).
 | POST | `/api/users` | `{ "name": string, "email": string, "password": string }` | Registrasi user baru |
 | POST | `/api/users/login` | `{ "email": string, "password": string }` | Login user, mengembalikan session token |
 | GET | `/api/users/current` | - | Detail user yang sedang login (butuh header `Authorization: Bearer <token>`) |
+| DELETE | `/api/users/logout` | - | Logout user, menghapus session (butuh header `Authorization: Bearer <token>`) |
 | PUT | `/api/users/:id` | `{ "name"?: string, "email"?: string }` | Update user |
 | DELETE | `/api/users/:id` | - | Hapus user |
 
@@ -166,6 +167,33 @@ Response sukses — status `200`:
   }
 }
 ```
+
+Response error — status `401`, untuk header yang tidak ada, format salah, atau token tidak valid:
+
+```json
+{
+  "error": "Unauthorized"
+}
+```
+
+#### Logout User
+
+Request:
+
+```bash
+curl -i -X DELETE http://localhost:3000/api/users/logout \
+  -H "Authorization: Bearer <token-dari-login>"
+```
+
+Response sukses — status `200`:
+
+```json
+{
+  "data": "OK"
+}
+```
+
+Session dengan token tersebut dihapus dari tabel `sessions`, sehingga token tidak bisa dipakai lagi.
 
 Response error — status `401`, untuk header yang tidak ada, format salah, atau token tidak valid:
 

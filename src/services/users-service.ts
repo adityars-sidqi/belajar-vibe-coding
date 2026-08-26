@@ -123,4 +123,27 @@ export const usersService = {
       },
     };
   },
+
+  async logout(authorization: string | undefined) {
+    const token = authorization?.startsWith("Bearer ")
+      ? authorization.slice("Bearer ".length)
+      : undefined;
+
+    if (!token) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    const [row] = await db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(eq(sessions.token, token));
+
+    if (!row) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    await db.delete(sessions).where(eq(sessions.token, token));
+
+    return { data: "OK" };
+  },
 };
