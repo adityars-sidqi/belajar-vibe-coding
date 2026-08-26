@@ -89,4 +89,38 @@ export const usersService = {
 
     return { data: token };
   },
+
+  async getCurrent(authorization: string | undefined) {
+    const token = authorization?.startsWith("Bearer ")
+      ? authorization.slice("Bearer ".length)
+      : undefined;
+
+    if (!token) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    const [row] = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        createdAt: users.createdAt,
+      })
+      .from(sessions)
+      .innerJoin(users, eq(sessions.userId, users.id))
+      .where(eq(sessions.token, token));
+
+    if (!row) {
+      throw new UnauthorizedError("Unauthorized");
+    }
+
+    return {
+      data: {
+        id: row.id,
+        name: row.name,
+        email: row.email,
+        created_at: row.createdAt,
+      },
+    };
+  },
 };

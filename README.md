@@ -85,6 +85,7 @@ Server berjalan di `http://localhost:<PORT>` (default `3000`).
 | GET | `/api/users/:id` | - | Detail user berdasarkan id |
 | POST | `/api/users` | `{ "name": string, "email": string, "password": string }` | Registrasi user baru |
 | POST | `/api/users/login` | `{ "email": string, "password": string }` | Login user, mengembalikan session token |
+| GET | `/api/users/current` | - | Detail user yang sedang login (butuh header `Authorization: Bearer <token>`) |
 | PUT | `/api/users/:id` | `{ "name"?: string, "email"?: string }` | Update user |
 | DELETE | `/api/users/:id` | - | Hapus user |
 
@@ -141,6 +142,36 @@ Response error — status `401`, untuk email tidak terdaftar maupun password sal
 ```json
 {
   "error": "Email atau password salah"
+}
+```
+
+#### Get Current User
+
+Request:
+
+```bash
+curl -i http://localhost:3000/api/users/current \
+  -H "Authorization: Bearer <token-dari-login>"
+```
+
+Response sukses — status `200`:
+
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "Aditya",
+    "email": "aditya@localhost",
+    "created_at": "2026-01-01T00:00:00.000Z"
+  }
+}
+```
+
+Response error — status `401`, untuk header yang tidak ada, format salah, atau token tidak valid:
+
+```json
+{
+  "error": "Unauthorized"
 }
 ```
 

@@ -26,6 +26,7 @@ export const usersRoutes = new Elysia({ prefix: "/api/users" })
   .post("/login", ({ body }) => usersService.login(body), {
     body: loginBody,
   })
+  .get("/current", ({ headers }) => usersService.getCurrent(headers.authorization))
   .get("/:id", ({ params }) => usersService.getById(params.id), {
     params: idParams,
   })
