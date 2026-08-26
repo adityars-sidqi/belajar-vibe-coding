@@ -1,9 +1,10 @@
 import { Elysia, t } from "elysia";
-import { usersService } from "./users.service";
+import { usersService } from "../services/users-service";
 
-const userBody = t.Object({
+const registerBody = t.Object({
   name: t.String({ minLength: 1 }),
   email: t.String({ format: "email" }),
+  password: t.String({ minLength: 6 }),
 });
 
 const userUpdateBody = t.Object({
@@ -15,16 +16,13 @@ const idParams = t.Object({
   id: t.Numeric(),
 });
 
-export const usersRoutes = new Elysia({ prefix: "/users" })
+export const usersRoutes = new Elysia({ prefix: "/api/users" })
   .get("/", () => usersService.list())
   .get("/:id", ({ params }) => usersService.getById(params.id), {
     params: idParams,
   })
-  .post("/", ({ body, set }) => {
-    set.status = 201;
-    return usersService.create(body);
-  }, {
-    body: userBody,
+  .post("/", ({ body }) => usersService.register(body), {
+    body: registerBody,
   })
   .put("/:id", ({ params, body }) => usersService.update(params.id, body), {
     params: idParams,

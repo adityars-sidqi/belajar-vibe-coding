@@ -81,20 +81,37 @@ Server berjalan di `http://localhost:<PORT>` (default `3000`).
 
 | Method | Path | Body | Keterangan |
 |---|---|---|---|
-| GET | `/users` | - | List semua user |
-| GET | `/users/:id` | - | Detail user berdasarkan id |
-| POST | `/users` | `{ "name": string, "email": string }` | Buat user baru |
-| PUT | `/users/:id` | `{ "name"?: string, "email"?: string }` | Update user |
-| DELETE | `/users/:id` | - | Hapus user |
+| GET | `/api/users` | - | List semua user |
+| GET | `/api/users/:id` | - | Detail user berdasarkan id |
+| POST | `/api/users` | `{ "name": string, "email": string, "password": string }` | Registrasi user baru |
+| PUT | `/api/users/:id` | `{ "name"?: string, "email"?: string }` | Update user |
+| DELETE | `/api/users/:id` | - | Hapus user |
 
-Semua response error mengikuti format konsisten:
+#### Registrasi User
+
+Request:
+
+```bash
+curl -i -X POST http://localhost:3000/api/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Aditya","email":"aditya@localhost","password":"rahasia"}'
+```
+
+Response sukses — status `200`:
 
 ```json
 {
-  "error": {
-    "message": "...",
-    "status": 400
-  }
+  "data": "OK"
+}
+```
+
+Password disimpan sebagai hash bcrypt (`Bun.password`, cost `10`) dan tidak pernah dikembalikan di response mana pun.
+
+Semua response error mengikuti format konsisten, dengan `error` berupa string:
+
+```json
+{
+  "error": "Email sudah terdaftar"
 }
 ```
 
@@ -107,8 +124,8 @@ src/
     db.ts        # koneksi database (drizzle + mysql2) yang di-share
   db/
     schema/      # definisi schema Drizzle
-  modules/
-    users/       # route + service per resource (contoh pola untuk resource lain)
+  routes/        # definisi route per resource (contoh: users-route.ts)
+  services/      # business logic per resource (contoh: users-service.ts)
   index.ts       # entry point: setup Elysia, health check, error handler terpusat
 drizzle.config.ts # konfigurasi Drizzle Kit
 drizzle/          # hasil generate migrasi (SQL + snapshot)
