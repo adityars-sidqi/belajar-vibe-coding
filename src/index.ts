@@ -1,13 +1,13 @@
 import { Elysia } from "elysia";
 import { env } from "./config/env";
-import { usersRoutes } from "./modules/users/users.routes";
-import { HttpError } from "./modules/users/users.service";
+import { usersRoutes } from "./routes/users-route";
+import { HttpError } from "./services/users-service";
 
 const app = new Elysia()
   .onError(({ code, error, set }) => {
     if (error instanceof HttpError) {
       set.status = error.status;
-      return { error: { message: error.message, status: error.status } };
+      return { error: error.message };
     }
 
     if (code === "VALIDATION") {
@@ -18,16 +18,16 @@ const app = new Elysia()
       } catch {
         // error.message wasn't JSON; fall back to the default message
       }
-      return { error: { message, status: 400 } };
+      return { error: message };
     }
 
     if (code === "NOT_FOUND") {
       set.status = 404;
-      return { error: { message: "Route not found", status: 404 } };
+      return { error: "Route not found" };
     }
 
     set.status = 500;
-    return { error: { message: "Internal server error", status: 500 } };
+    return { error: "Internal server error" };
   })
   .get("/health", () => ({ status: "ok" }))
   .use(usersRoutes)
