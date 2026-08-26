@@ -15,6 +15,13 @@
       "when": 1787764999428,
       "tag": "0001_graceful_hobgoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1787766378326,
+      "tag": "0002_early_blue_marvel",
+      "breakpoints": true
     }
   ]
 }
