@@ -26,6 +26,16 @@ const publicColumns = {
   updatedAt: users.updatedAt,
 };
 
+function requireBearerToken(authorization: string | undefined): string {
+  const token = authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+
+  if (!token) {
+    throw new UnauthorizedError("Unauthorized");
+  }
+
+  return token;
+}
+
 export const usersService = {
   async list() {
     return db.select(publicColumns).from(users);
@@ -91,13 +101,7 @@ export const usersService = {
   },
 
   async getCurrent(authorization: string | undefined) {
-    const token = authorization?.startsWith("Bearer ")
-      ? authorization.slice("Bearer ".length)
-      : undefined;
-
-    if (!token) {
-      throw new UnauthorizedError("Unauthorized");
-    }
+    const token = requireBearerToken(authorization);
 
     const [row] = await db
       .select({
@@ -125,24 +129,13 @@ export const usersService = {
   },
 
   async logout(authorization: string | undefined) {
-    const token = authorization?.startsWith("Bearer ")
-      ? authorization.slice("Bearer ".length)
-      : undefined;
+    const token = requireBearerToken(authorization);
 
-    if (!token) {
+    const [result] = await db.delete(sessions).where(eq(sessions.token, token));
+
+    if (result.affectedRows === 0) {
       throw new UnauthorizedError("Unauthorized");
     }
-
-    const [row] = await db
-      .select({ id: sessions.id })
-      .from(sessions)
-      .where(eq(sessions.token, token));
-
-    if (!row) {
-      throw new UnauthorizedError("Unauthorized");
-    }
-
-    await db.delete(sessions).where(eq(sessions.token, token));
 
     return { data: "OK" };
   },
